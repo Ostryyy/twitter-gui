@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { TextField, Button, Paper, Typography } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+
+import API from "./axiosConfig";
 import classes from "./Auth.module.css";
 import logo from "../../assets/images/logo.png";
 
@@ -7,9 +11,30 @@ function RegisterPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    toast.promise(
+      API.post('/api/auth/register', { email, username, password })
+        .then((response) => {
+          navigate('/login');
+          return response.data.message; 
+        }),
+      {
+        pending: 'Registering...',
+        success: 'Registration successful! Please log in.',
+        error: {
+          render({data}) {
+            let message = 'Registration failed. Please try again.';
+            if (data.response && data.response.data && data.response.data.error) {
+              message = data.response.data.error;
+            }
+            return message;
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -67,6 +92,14 @@ function RegisterPage() {
           >
             Register
           </Button>
+          <Typography variant="body2" color="textSecondary" align="center">
+            <span style={{ marginRight: "0.5em" }}>
+              Already have an account?
+            </span>
+            <Link to="/login" variant="body2">
+              Log in
+            </Link>
+          </Typography>
         </form>
       </Paper>
     </div>

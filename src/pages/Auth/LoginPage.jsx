@@ -1,14 +1,56 @@
 import React, { useState } from "react";
-import { TextField, Button, Typography, Paper } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import API, { setAuthToken } from "./axiosConfig";
+import { toast } from "react-toastify";
+
 import classes from "./Auth.module.css";
 import logo from "../../assets/images/logo.png";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    toast.promise(
+      API.post("/api/auth/login", { email, password }).then((response) => {
+        const { token } = response.data;
+        if (rememberMe) {
+          localStorage.setItem("token", token);
+        }
+        setAuthToken(token);
+        navigate('/');
+      }),
+      {
+        pending: "Logging in...",
+        success: "Logged in successfully!",
+        error: {
+          render({ data }) {
+            let message = "Login failed. Please check your credentials.";
+            if (
+              data.response &&
+              data.response.data &&
+              data.response.data.error
+            ) {
+              message = data.response.data.error;
+            }
+            return message;
+          },
+        },
+      }
+    );
   };
 
   return (
@@ -27,7 +69,7 @@ function LoginPage() {
             required
             fullWidth
             id="email"
-            label="Address Email"
+            label="Email Address"
             name="email"
             autoComplete="email"
             autoFocus
@@ -47,6 +89,17 @@ function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                value="remember"
+                color="primary"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+            }
+            label="Remember me"
+          />
           <Button
             type="submit"
             fullWidth
@@ -55,6 +108,12 @@ function LoginPage() {
           >
             Login
           </Button>
+          <Typography variant="body2" color="textSecondary" align="center">
+            <span style={{ marginRight: "0.5em" }}>Don't have an account?</span>
+            <Link to="/register" variant="body2">
+              Sign up
+            </Link>
+          </Typography>
         </form>
       </Paper>
     </div>
