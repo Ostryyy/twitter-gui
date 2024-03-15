@@ -27,9 +27,13 @@ function LoginPage() {
     toast.promise(
       API.post("/api/auth/login", { email, password }).then((response) => {
         const { token } = response.data;
+
         if (rememberMe) {
           localStorage.setItem("token", token);
+        }else{
+          sessionStorage.setItem("token", token)
         }
+        
         setAuthToken(token);
         navigate('/');
       }),
