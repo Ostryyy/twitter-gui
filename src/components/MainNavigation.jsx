@@ -21,6 +21,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
+import { useDispatch } from "react-redux";import { logoutUser } from "../store/features/auth/authSlice"
 
 const drawerWidth = 340;
 
@@ -29,6 +30,7 @@ const MainNavigation = ({ user }) => {
   const isUserMenuOpen = Boolean(userMenuAnchorEl);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleUserMenuClick = (event) => {
     setUserMenuAnchorEl(event.currentTarget);
@@ -40,8 +42,7 @@ const MainNavigation = ({ user }) => {
 
   const handleLogout = () => {
     handleClose();
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
+    dispatch(logoutUser())
     navigate("/login");
   };
 
