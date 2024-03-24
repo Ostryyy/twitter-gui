@@ -11,6 +11,9 @@ import { Link, useNavigate } from "react-router-dom";
 import API, { setAuthToken } from "./axiosConfig";
 import { toast } from "react-toastify";
 
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/features/auth/authSlice";
+
 import classes from "./Auth.module.css";
 import logo from "../../assets/images/logo.png";
 
@@ -20,22 +23,24 @@ function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     toast.promise(
       API.post("/api/auth/login", { email, password }).then((response) => {
-        const { token } = response.data;
+        const { token, user } = response.data;
 
         if (rememberMe) {
           localStorage.setItem("token", token);
-        }else{
-          sessionStorage.setItem("token", token)
+        } else {
+          sessionStorage.setItem("token", token);
         }
-        
+
+        dispatch(setUser(user));
         setAuthToken(token);
-        navigate('/');
+        navigate("/");
       }),
       {
         pending: "Logging in...",
