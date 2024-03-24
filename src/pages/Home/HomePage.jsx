@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, CssBaseline } from "@mui/material";
- import MainNavigation from "../components/MainNavigation";
+ import MainNavigation from "../../components/MainNavigation";
  import { useSelector } from "react-redux";
 
 const HomePage = () => {

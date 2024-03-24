@@ -21,7 +21,8 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
-import { useDispatch } from "react-redux";import { logoutUser } from "../store/features/auth/authSlice"
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../store/features/auth/authSlice";
 
 const drawerWidth = 340;
 
@@ -42,7 +43,7 @@ const MainNavigation = ({ user }) => {
 
   const handleLogout = () => {
     handleClose();
-    dispatch(logoutUser())
+    dispatch(logoutUser());
     navigate("/login");
   };
 
