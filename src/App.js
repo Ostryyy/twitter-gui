@@ -12,6 +12,7 @@ import AuthRedirect from "./AuthRedirect";
 
 import HomePage from "./pages/Home/HomePage";
 import FeedPage from "./pages/Home/pages/FeedPage";
+import ProfilePage from "./pages/Home/pages/ProfilePage";
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />}>
             <Route index element={<Navigate replace to="feed" />} />
-            <Route path="feed" element={<FeedPage />} />
+            <Route path="feed" element={<FeedPage />} />{" "}
+            <Route path="profile/:userId" element={<ProfilePage />} />
           </Route>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

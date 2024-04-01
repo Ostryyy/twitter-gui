@@ -8,11 +8,13 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 import API from "../pages/Auth/axiosConfig";
 
 const TweetComponent = ({ tweet, fetchTweets }) => {
   const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -98,7 +100,7 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
     <Card style={tweetStyle} elevation={2}>
       <div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography color="textSecondary" gutterBottom>
+          <Typography color="textSecondary" style={{cursor:'pointer'}} gutterBottom onClick={() => navigate(`/profile/${tweet.author._id}`)}>
             @{tweet.author.username} • {formatDate(tweet.createdAt)}
           </Typography>
 

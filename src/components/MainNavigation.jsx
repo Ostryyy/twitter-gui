@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import {
   Home,
-  Search,
+  // Search,
   Person,
   MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
@@ -49,11 +49,11 @@ const MainNavigation = ({ user }) => {
 
   const navigationItems = [
     { text: "Home", icon: <Home />, link: "/" },
-    { text: "Browse", icon: <Search />, link: "/browse" },
+    // { text: "Browse", icon: <Search />, link: "/browse" },
     {
       text: "Profile",
       icon: <Person />,
-      link: `/profile/${user && user._id ? user._id : ""}`,
+      link: `/profile/${user && user._id ? user._id : "../login"}`,
     },
   ];
 
@@ -93,7 +93,7 @@ const MainNavigation = ({ user }) => {
       </Toolbar>
       <List sx={{ flexGrow: 1 }}>
         {navigationItems.map((item) => (
-          <ListItemButton key={item.text} to={item.link}>
+          <ListItemButton key={item.text} onClick={() => navigate(item.link)}>
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItemButton>
