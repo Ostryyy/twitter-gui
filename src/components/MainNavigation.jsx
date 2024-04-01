@@ -19,7 +19,7 @@ import {
   Person,
   MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../store/features/auth/authSlice";
@@ -31,6 +31,7 @@ const MainNavigation = ({ user }) => {
   const isUserMenuOpen = Boolean(userMenuAnchorEl);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const handleUserMenuClick = (event) => {
@@ -48,7 +49,7 @@ const MainNavigation = ({ user }) => {
   };
 
   const navigationItems = [
-    { text: "Home", icon: <Home />, link: "/" },
+    { text: "Home", icon: <Home />, link: "/feed" },
     // { text: "Browse", icon: <Search />, link: "/browse" },
     {
       text: "Profile",
@@ -93,12 +94,25 @@ const MainNavigation = ({ user }) => {
       </Toolbar>
       <List sx={{ flexGrow: 1 }}>
         {navigationItems.map((item) => (
-          <ListItemButton key={item.text} onClick={() => navigate(item.link)}>
+          <ListItemButton
+            key={item.text}
+            onClick={() => navigate(item.link)}
+            sx={{
+              backgroundColor:
+                location.pathname === item.link
+                  ? "rgba(0, 0, 0, 0.04)"
+                  : "transparent",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+          >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItemButton>
         ))}
       </List>
+
       <Divider />
       {user && (
         <List sx={{ width: "100%", position: "absolute", bottom: 0 }}>
