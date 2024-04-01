@@ -1,5 +1,17 @@
 import React, { useState } from "react";
-import { Card, Typography, IconButton, Menu, MenuItem } from "@mui/material";
+import {
+  Card,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  Modal,
+  Box,
+  TextField,
+  Button,
+  Stack,
+  Avatar,
+} from "@mui/material";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -18,6 +30,25 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    borderRadius: "4px",
+    boxShadow: 24,
+    p: 4,
+  };
+
+  const [commentText, setCommentText] = useState("");
+
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
 
   const tweetStyle = {
     display: "flex",
@@ -79,6 +110,21 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
     }
   };
 
+  const postComment = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      await API.post(`/api/tweets/${tweet._id}/comment`, {
+        content: commentText,
+      });
+      setCommentText("");
+      fetchTweets();
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      toast.error("Failed to add comment. Please try again later.");
+    }
+  };
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -97,67 +143,140 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
   );
 
   return (
-    <Card style={tweetStyle} elevation={2}>
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography color="textSecondary" style={{cursor:'pointer'}} gutterBottom onClick={() => navigate(`/profile/${tweet.author._id}`)}>
-            @{tweet.author.username} • {formatDate(tweet.createdAt)}
-          </Typography>
+    <>
+      <Card style={tweetStyle} elevation={2}>
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography
+              color="textSecondary"
+              style={{ cursor: "pointer" }}
+              gutterBottom
+              onClick={() => navigate(`/profile/${tweet.author._id}`)}
+            >
+              @{tweet.author.username} • {formatDate(tweet.createdAt)}
+            </Typography>
 
-          {tweet.author._id === user._id && (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <IconButton
-                aria-label="more"
-                aria-controls="long-menu"
-                aria-haspopup="true"
-                onClick={handleClick}
-              >
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                id="long-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={open}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleDelete}>
-                  <DeleteIcon style={iconStyle} /> Delete
-                </MenuItem>
-              </Menu>
-            </div>
+            {tweet.author._id === user._id && (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <IconButton
+                  aria-label="more"
+                  aria-controls="long-menu"
+                  aria-haspopup="true"
+                  onClick={handleClick}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  id="long-menu"
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={open}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={handleDelete}>
+                    <DeleteIcon style={iconStyle} /> Delete
+                  </MenuItem>
+                </Menu>
+              </div>
+            )}
+          </div>
+
+          {tweet.content && (
+            <Typography variant="body1">{tweet.content}</Typography>
           )}
+
+          {tweet.originalTweetId
+            ? renderOriginalTweet(tweet.originalTweetId)
+            : null}
         </div>
 
-        {tweet.content && (
-          <Typography variant="body1">{tweet.content}</Typography>
-        )}
+        <div style={cardFooterStyle}>
+          <IconButton aria-label="like" onClick={handleLike}>
+            {tweet.likes.some((like) => like === user._id) ? (
+              <FavoriteIcon style={{ ...iconStyle, color: "#FF0000" }} />
+            ) : (
+              <FavoriteBorderIcon style={iconStyle} />
+            )}
 
-        {tweet.originalTweetId
-          ? renderOriginalTweet(tweet.originalTweetId)
-          : null}
-      </div>
+            <Typography>{tweet.likes.length}</Typography>
+          </IconButton>
+          <IconButton aria-label="comment" onClick={handleOpenModal}>
+            <ChatBubbleOutlineIcon style={iconStyle} />
+            <Typography>{tweet.comments.length}</Typography>
+          </IconButton>
+          <IconButton aria-label="retweet" onClick={handleRetweet}>
+            <RepeatIcon style={iconStyle} />
+            <Typography>{tweet.retweets.length}</Typography>
+          </IconButton>
+        </div>
+      </Card>
 
-      <div style={cardFooterStyle}>
-        <IconButton aria-label="like" onClick={handleLike}>
-          {tweet.likes.some((like) => like === user._id) ? (
-            <FavoriteIcon style={{...iconStyle, color: '#FF0000'}} />
-          ) : (
-            <FavoriteBorderIcon style={iconStyle} />
-          )}
-
-          <Typography>{tweet.likes.length}</Typography>
-        </IconButton>
-        <IconButton aria-label="comment">
-          <ChatBubbleOutlineIcon style={iconStyle} />
-          <Typography>{tweet.comments.length}</Typography>
-        </IconButton>
-        <IconButton aria-label="retweet" onClick={handleRetweet}>
-          <RepeatIcon style={iconStyle} />
-          <Typography>{tweet.retweets.length}</Typography>
-        </IconButton>
-      </div>
-    </Card>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Comments
+          </Typography>
+          <Box
+            sx={{
+              maxHeight: "300px",
+              overflowY: "auto",
+              marginBottom: 2,
+            }}
+          >
+            {tweet.comments.map((comment, index) => (
+              <Stack
+                key={index}
+                direction="row"
+                spacing={2}
+                sx={{ mt: 2 }}
+              >
+                <Avatar
+                  alt={comment.author.username}
+                  src={comment.author.avatar}
+                />
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      navigate(`/profile/${tweet.author._id}`);
+                      handleCloseModal();
+                    }}
+                  >
+                    @{comment.author.username}
+                  </Typography>
+                  <Typography variant="body2">{comment.content}</Typography>
+                </Box>
+              </Stack>
+            ))}
+          </Box>
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              postComment();
+            }}
+          >
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Add comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <Button type="submit" variant="contained" color="primary">
+              Add
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </>
   );
 };
 
