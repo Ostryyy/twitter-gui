@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Container, Box, TextField, Button } from "@mui/material";
+import {  Box, TextField, Button } from "@mui/material";
 import TweetComponent from "../../../components/TweetComponent";
 import API from "../../../pages/Auth/axiosConfig";
+import { toast } from "react-toastify";
 
 const FeedPage = () => {
   const [tweets, setTweets] = useState([]);
@@ -17,13 +18,18 @@ const FeedPage = () => {
   };
 
   const postTweet = async () => {
-    await API.post("/api/tweets", { content: newTweet });
-    fetchTweets();
+    try {
+      await API.post("/api/tweets", { content: newTweet });
+      fetchTweets();
+    } catch (error) {
+      console.error("Failed to create tweet:", error);
+      toast.error("Failed to create tweet. Please try again later.");
+    }
     setNewTweet("");
   };
 
   return (
-    <Container>
+    <div style={{width:"100%", padding: "24px"}}>
       <Box my={4}>
         <TextField
           fullWidth
@@ -48,7 +54,7 @@ const FeedPage = () => {
           fetchTweets={fetchTweets}
         />
       ))}
-    </Container>
+    </div>
   );
 };
 

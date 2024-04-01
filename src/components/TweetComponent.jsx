@@ -3,9 +3,11 @@ import { Card, Typography, IconButton, Menu, MenuItem } from "@mui/material";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 import API from "../pages/Auth/axiosConfig";
 
@@ -45,19 +47,34 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
   };
 
   const handleLike = async () => {
-    await API.post(`/api/tweets/${tweet._id}/like`, {});
-    fetchTweets();
+    try {
+      await API.post(`/api/tweets/${tweet._id}/like`, {});
+      fetchTweets();
+    } catch (error) {
+      console.error("Failed to like tweet:", error);
+      toast.error("Failed to like tweet. Please try again later.");
+    }
   };
 
   const handleRetweet = async () => {
-    await API.post(`/api/tweets/${tweet._id}/retweet`, {});
-    fetchTweets();
+    try {
+      await API.post(`/api/tweets/${tweet._id}/retweet`, {});
+      fetchTweets();
+    } catch (error) {
+      console.error("Failed to retweet:", error);
+      toast.error("Failed to retweet. Please try again later.");
+    }
   };
 
   const handleDelete = async () => {
     setAnchorEl(null);
-    await API.delete(`/api/tweets/${tweet._id}`);
-    fetchTweets();
+    try {
+      await API.delete(`/api/tweets/${tweet._id}`);
+      fetchTweets();
+    } catch (error) {
+      console.error("Failed to delete tweet:", error);
+      toast.error("Failed to delete tweet. Please try again later.");
+    }
   };
 
   const handleClick = (event) => {
@@ -68,6 +85,15 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
     setAnchorEl(null);
   };
 
+  const renderOriginalTweet = (originalTweet) => (
+    <Card style={{ padding: 16 }}>
+      <Typography color="textSecondary" gutterBottom>
+        @{originalTweet.author.username} • {formatDate(originalTweet.createdAt)}
+      </Typography>
+      <Typography variant="body1">{originalTweet.content}</Typography>
+    </Card>
+  );
+
   return (
     <Card style={tweetStyle} elevation={2}>
       <div>
@@ -77,7 +103,7 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
           </Typography>
 
           {tweet.author._id === user._id && (
-            <>
+            <div style={{ display: "flex", alignItems: "center" }}>
               <IconButton
                 aria-label="more"
                 aria-controls="long-menu"
@@ -97,16 +123,27 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
                   <DeleteIcon style={iconStyle} /> Delete
                 </MenuItem>
               </Menu>
-            </>
+            </div>
           )}
         </div>
 
-        <Typography variant="body1">{tweet.content}</Typography>
+        {tweet.content && (
+          <Typography variant="body1">{tweet.content}</Typography>
+        )}
+
+        {tweet.originalTweetId
+          ? renderOriginalTweet(tweet.originalTweetId)
+          : null}
       </div>
 
       <div style={cardFooterStyle}>
         <IconButton aria-label="like" onClick={handleLike}>
-          <FavoriteBorderIcon style={iconStyle} />
+          {tweet.likes.some((like) => like === user._id) ? (
+            <FavoriteIcon style={{...iconStyle, color: '#FF0000'}} />
+          ) : (
+            <FavoriteBorderIcon style={iconStyle} />
+          )}
+
           <Typography>{tweet.likes.length}</Typography>
         </IconButton>
         <IconButton aria-label="comment">
