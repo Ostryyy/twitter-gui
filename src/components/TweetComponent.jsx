@@ -229,12 +229,7 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
             }}
           >
             {tweet.comments.map((comment, index) => (
-              <Stack
-                key={index}
-                direction="row"
-                spacing={2}
-                sx={{ mt: 2 }}
-              >
+              <Stack key={index} direction="row" spacing={2} sx={{ mt: 2 }}>
                 <Avatar
                   alt={comment.author.username}
                   src={comment.author.avatar}
@@ -248,7 +243,7 @@ const TweetComponent = ({ tweet, fetchTweets }) => {
                       handleCloseModal();
                     }}
                   >
-                    @{comment.author.username}
+                    @{comment.author.username} • {formatDate(comment.createdAt)}
                   </Typography>
                   <Typography variant="body2">{comment.content}</Typography>
                 </Box>
